@@ -6,6 +6,8 @@
 
 [Toss Payments 개발자 센터](https://docs.tosspayments.com/reference/using-api/api-keys)
 
+>토스페이먼츠는 개발자의 연동 편의를 위해 라이브 환경과 비슷한 테스트 환경을 제공하고 있다. 테스트 환경에서는 카드 번호와 같은 실제 결제 정보를 입력해도, 결제는 가상으로 승인돼요. 따라서 테스트 환경에서는 결제가 승인되어도 실제 결제수단에서 돈이 출금되지 않는다.
+
 API KEY 의 시크릿 키 부분을 가져와서 다음과 같이 어플리케이션에서 사용할 수 있도록 application.yaml 에 추가해준다. 
 
 ```yaml
