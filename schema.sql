@@ -29,3 +29,14 @@ CREATE TABLE IF NOT EXISTS payment_orders (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (payment_event_id) REFERENCES payment_events(id)
 );
+
+CREATE TABLE IF NOT EXISTS payment_order_histories (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    payment_order_id BIGINT NOT NULL,
+    previous_status VARCHAR(50),
+    new_status VARCHAR(50),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    changed_by VARCHAR(255),
+    reason VARCHAR(255),
+    FOREIGN KEY (payment_order_id) REFERENCES payment_orders(id)
+);

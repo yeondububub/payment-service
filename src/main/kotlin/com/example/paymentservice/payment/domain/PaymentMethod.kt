@@ -1,6 +1,8 @@
 package com.example.paymentservice.payment.domain
 
 enum class PaymentMethod(val method: String) {
+    TRANSFER("계좌이체"),
+    CARD("카드"),
     EASY_PAY("간편결제");
 
     companion object {

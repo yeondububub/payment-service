@@ -38,9 +38,9 @@
             const button = document.getElementById("payment-button");
             const coupon = document.getElementById("coupon-box");
 
-            const orderId = [[${ orderId }]];
-            const orderName = [[${ orderName }]];
-            const initialAmount = [[${ amount }]];
+            const orderId = `[[${ orderId }]]`;
+            const orderName = `[[${ orderName }]]`;
+            const initialAmount = Number(`[[${ amount }]]`);
 
             console.log('orderId: ' + orderId);
             console.log('orderName: ' + orderName);
