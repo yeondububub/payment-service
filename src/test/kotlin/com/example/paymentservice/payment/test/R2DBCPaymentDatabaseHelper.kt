@@ -11,6 +11,7 @@ import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
 @TestConfiguration
@@ -30,7 +31,7 @@ class R2DBCPaymentDatabaseHelper(
                 paymentKey = results.first()["payment_key"] as String?,
                 paymentType = if (results.first()["type"] != null) PaymentType.get(results.first()["type"] as String) else null,
                 paymentMethod = if (results.first()["method"] != null) PaymentMethod.valueOf(results.first()["method"] as String) else null,
-                approvedAt = if (results.first()["approved_at"] != null) (results.first()["approved_at"] as ZonedDateTime).toLocalDateTime() else null,
+                approvedAt = results.first()["approved_at"] as? LocalDateTime,
                 isPaymentDone = ((results.first()["is_payment_done"] as Byte).toInt() == 1),
                 paymentOrders = results.map { result ->
                     PaymentOrder(
@@ -49,13 +50,23 @@ class R2DBCPaymentDatabaseHelper(
     }
 
     override fun clean(): Mono<Void> {
-        return deletePaymentOrders().flatMap { deletePaymentEvents() }
+        return deletePaymentOrderHistories()
+            .flatMap { deletePaymentOrders() }
+            .flatMap { deletePaymentEvents() }
+            .flatMap { deletePaymentOrders() }
+            .flatMap { deletePaymentEvents() }
             .`as`(transactionalOperator::transactional)
             .then()
     }
 
     private fun deletePaymentOrders(): Mono<Long> {
         return databaseClient.sql(DELETE_PAYMENT_ORDER_QUERY)
+            .fetch()
+            .rowsUpdated()
+    }
+
+    private fun deletePaymentOrderHistories(): Mono<Long> {
+        return databaseClient.sql(DELETE_PAYMENT_ORDER_HISTORY_QUERY)
             .fetch()
             .rowsUpdated()
     }
@@ -81,5 +92,9 @@ class R2DBCPaymentDatabaseHelper(
         val DELETE_PAYMENT_EVENT_QUERY = """
                                          DELETE FROM payment_events
                                          """.trimIndent()
+
+        val DELETE_PAYMENT_ORDER_HISTORY_QUERY = """
+                                                 DELETE FROM payment_order_histories
+                                                 """.trimIndent()
     }
 }
