@@ -1,9 +1,12 @@
+---
 spring:
   application:
     name: payment-service
 
   config:
     import: optional:file:.env[.properties]
+    activate:
+      on-profile: dev
 
   r2dbc:
     url: r2dbc:mysql://localhost:3306/test
