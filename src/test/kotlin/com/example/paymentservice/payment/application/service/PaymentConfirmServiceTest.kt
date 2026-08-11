@@ -52,7 +52,8 @@ class PaymentConfirmServiceTest(
     }
 
     @Test
-    fun `should be marked as SUCCESS if Payment Confirmation success in PSP`() {
+    @DisplayName("PSP에서 결제 확인에 성공하면 SUCCESS로 표시된다.")
+    fun test1() {
         Hooks.onOperatorDebug()
 
         val orderId = UUID.randomUUID().toString()
@@ -110,7 +111,8 @@ class PaymentConfirmServiceTest(
     }
 
     @Test
-    fun `should be marked as FAILURE if Payment Confirmation fails on PSP`() {
+    @DisplayName("PSP에서 결제 확인에 실패하면 FAIL로 표시된다.")
+    fun test2() {
         Hooks.onOperatorDebug()
 
         val orderId = UUID.randomUUID().toString()
@@ -162,7 +164,8 @@ class PaymentConfirmServiceTest(
     }
 
     @Test
-    fun `should be marked as UNKNOWN if Payment Confirmation fails on PSP`() {
+    @DisplayName("PSP에서 결제 확인에 실패하면 UNKNOWN로 표시된다.")
+    fun test3() {
         val orderId = UUID.randomUUID().toString()
 
         val checkoutCommand = CheckoutCommand(

@@ -7,6 +7,7 @@ import com.example.paymentservice.payment.test.PaymentTestConfiguration
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,7 +29,8 @@ class CheckoutServiceTest @Autowired constructor(
     }
 
     @Test
-    fun `should save PaymentEvent and PaymentOrder successfully`() {
+    @DisplayName("체크아웃(결제 준비)에 성공한다.")
+    fun test1() {
         val orderId = UUID.randomUUID().toString()
         val checkoutCommand = CheckoutCommand(
             cartId = 1,
@@ -54,7 +56,8 @@ class CheckoutServiceTest @Autowired constructor(
     }
 
     @Test
-    fun `should fail to save PaymentEvent and PaymentOrder when trying to save for the second time`() {
+    @DisplayName("동일한 주문(중복 요청)이 들어오면 에러가 발생한다. (멱등성 테스트)")
+    fun test2() {
         val orderId = UUID.randomUUID().toString()
         val checkoutCommand = CheckoutCommand(
             cartId = 1,
