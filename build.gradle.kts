@@ -19,10 +19,21 @@ repositories {
     mavenCentral()
 }
 
+val springCloudVersion = "2024.0.0"
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
+    }
+}
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("org.springframework.cloud:spring-cloud-stream")
+    implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka-reactive")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
