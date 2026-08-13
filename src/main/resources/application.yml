@@ -19,6 +19,12 @@ spring:
   thymeleaf:
     cache: false
 
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:9092
+
 PSP:
   toss:
     url: https://api.tosspayments.com

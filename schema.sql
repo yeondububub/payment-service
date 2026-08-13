@@ -40,3 +40,16 @@ CREATE TABLE IF NOT EXISTS payment_order_histories (
     reason VARCHAR(255),
     FOREIGN KEY (payment_order_id) REFERENCES payment_orders(id)
 );
+
+CREATE TABLE IF NOT EXISTS outboxes (
+                                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                        idempotency_key VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    partition_key INT NOT NULL DEFAULT 0,
+    payload JSON NOT NULL,
+    metadata JSON NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'INIT',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_idempotency_type (idempotency_key, type)
+    );
