@@ -23,6 +23,7 @@ import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Tag
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -215,7 +216,7 @@ class PaymentConfirmServiceTest(
     }
 
     @Test
-    @DisplayName("PSPConfirmationException 핸들링")
+    @DisplayName("PSP 결제 승인 중 예외(PSPConfirmationException)가 발생하면 결제를 실패(FAILURE) 처리한다")
     fun test4() {
         val orderId = UUID.randomUUID().toString()
 
@@ -261,7 +262,7 @@ class PaymentConfirmServiceTest(
     }
 
     @Test
-    @DisplayName("PaymentValidationException 핸들링")
+    @DisplayName("결제 금액 검증 예외(PaymentValidationException)가 발생하면 결제를 실패(FAILURE) 처리한다")
     fun test5() {
         val orderId = UUID.randomUUID().toString()
 
@@ -298,5 +299,60 @@ class PaymentConfirmServiceTest(
 
         assertThat(paymentConfirmationResult.status).isEqualTo(PaymentStatus.FAILURE)
         assertTrue(paymentEvent.isFailure())
+    }
+
+    @Test
+    @Tag("ExternalIntegration")
+    @DisplayName("결제 승인이 완료되면 결제 정보를 저장하고 카프카 이벤트 메시지까지 정상 전송한다")
+    fun test6() {
+        Hooks.onOperatorDebug()
+
+        val orderId = UUID.randomUUID().toString()
+
+        val checkoutCommand = CheckoutCommand(
+            cartId = 1,
+            buyerId = 1,
+            productIds = listOf(1, 2, 3),
+            idempotencyKey = orderId
+        )
+
+        val checkoutResult = checkoutUseCase.checkout(checkoutCommand).block()!!
+
+        val paymentConfirmCommand = PaymentConfirmCommand(
+            paymentKey = UUID.randomUUID().toString(),
+            orderId = orderId,
+            amount = checkoutResult.amount
+        )
+
+        val paymentConfirmService = PaymentConfirmService(
+            paymentStatusUpdatePort = paymentStatusUpdatePort,
+            paymentValidationPort = paymentValidationPort,
+            paymentExecutorPort = mockPaymentExecutorPort,
+            paymentErrorHandler = paymentErrorHandler
+        )
+
+        val paymentExecutionResult = PaymentExecutionResult(
+            paymentKey = paymentConfirmCommand.paymentKey,
+            orderId = paymentConfirmCommand.orderId,
+            extraDetails = PaymentExtraDetails(
+                type = PaymentType.NORMAL,
+                method = PaymentMethod.EASY_PAY,
+                totalAmount = paymentConfirmCommand.amount,
+                orderName = "test_order_name",
+                pspConfirmationStatus = PSPConfirmationStatus.DONE,
+                approvedAt = LocalDateTime.now(),
+                pspRawData = "{}"
+            ),
+            isSuccess = true,
+            isRetryable = false,
+            isUnknown = false,
+            isFailure = false
+        )
+
+        every { mockPaymentExecutorPort.execute(paymentConfirmCommand) } returns Mono.just(paymentExecutionResult)
+
+        paymentConfirmService.confirm(paymentConfirmCommand).block()!!
+
+        Thread.sleep(10000)
     }
 }

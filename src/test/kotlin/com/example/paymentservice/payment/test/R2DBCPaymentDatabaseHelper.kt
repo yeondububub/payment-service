@@ -19,6 +19,7 @@ class R2DBCPaymentDatabaseHelper(
     private val databaseClient: DatabaseClient,
     private val transactionalOperator: TransactionalOperator
 ): PaymentDatabaseHelper {
+
     override fun getPayments(orderId: String): PaymentEvent? {
         return databaseClient.sql(SELECT_PAYMENT_QUERY)
             .bind("orderId", orderId).fetch().all()
@@ -53,8 +54,7 @@ class R2DBCPaymentDatabaseHelper(
         return deletePaymentOrderHistories()
             .flatMap { deletePaymentOrders() }
             .flatMap { deletePaymentEvents() }
-            .flatMap { deletePaymentOrders() }
-            .flatMap { deletePaymentEvents() }
+            .flatMap { deleteOutboxes() }
             .`as`(transactionalOperator::transactional)
             .then()
     }
@@ -71,6 +71,12 @@ class R2DBCPaymentDatabaseHelper(
             .rowsUpdated()
     }
 
+    private fun deleteOutboxes(): Mono<Long> {
+        return databaseClient.sql(DELETE_OUTBOX_QUERY)
+            .fetch()
+            .rowsUpdated()
+    }
+
     private fun deletePaymentEvents(): Mono<Long> {
         return databaseClient.sql(DELETE_PAYMENT_EVENT_QUERY)
             .fetch()
@@ -79,22 +85,25 @@ class R2DBCPaymentDatabaseHelper(
 
     companion object {
         val SELECT_PAYMENT_QUERY = """
-                                   SELECT *
-                                   FROM payment_events pe 
-                                   INNER JOIN payment_orders po ON pe.order_id = po.order_id
-                                   WHERE pe.order_id = :orderId
-                                   """.trimIndent()
+            SELECT *
+            FROM payment_events pe 
+            INNER JOIN payment_orders po ON pe.order_id = po.order_id
+            WHERE pe.order_id = :orderId
+        """.trimIndent()
 
         val DELETE_PAYMENT_ORDER_QUERY = """
-                                         DELETE FROM payment_orders
-                                         """.trimIndent()
+            DELETE FROM payment_orders
+        """.trimIndent()
 
         val DELETE_PAYMENT_EVENT_QUERY = """
-                                         DELETE FROM payment_events
-                                         """.trimIndent()
+            DELETE FROM payment_events
+        """.trimIndent()
 
         val DELETE_PAYMENT_ORDER_HISTORY_QUERY = """
-                                                 DELETE FROM payment_order_histories
-                                                 """.trimIndent()
+            DELETE FROM payment_order_histories
+        """.trimIndent()
+        val DELETE_OUTBOX_QUERY = """
+            DELETE FROM outboxes
+        """.trimIndent()
     }
 }

@@ -15,10 +15,11 @@ import reactor.core.publisher.Mono
 import java.time.LocalDateTime
 
 @Repository
-class R2DBCPaymentOutboxRepository(
+class cCPaymentOutboxRepository(
     private val databaseClient: DatabaseClient,
     private val partitionKeyUtil: PartitionKeyUtil
 ): PaymentOutboxRepository {
+
     override fun insertOutbox(command: PaymentStatusUpdateCommand): Mono<PaymentEventMessage> {
         require(command.status == PaymentStatus.SUCCESS)
 
