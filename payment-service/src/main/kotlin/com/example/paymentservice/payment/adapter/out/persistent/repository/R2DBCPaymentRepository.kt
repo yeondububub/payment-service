@@ -21,7 +21,8 @@ class R2DBCPaymentRepository (
 ) : PaymentRepository {
 
     override fun save(paymentEvent: PaymentEvent): Mono<Void> {
-        return insertPaymentEvent(paymentEvent).flatMap { selectPaymentEventId() }
+        return insertPaymentEvent(paymentEvent)
+            .flatMap { selectPaymentEventId() }
             .flatMap { paymentEventId -> insertPaymentOrders(paymentEvent, paymentEventId) }
             .`as`(transactionalOperator::transactional)
             .then()
@@ -110,8 +111,7 @@ class R2DBCPaymentRepository (
                 FROM payment_events pe
                 INNER JOIN payment_orders po ON po.payment_event_id = pe.id
                 WHERE (po.payment_order_status = 'UNKNOWN' 
-                    OR (po.payment_order_status = 'EXECUTING' 
-                    AND po.updated_at <= :updatedAt - INTERVAL 3 MINUTE))
+                        OR (po.payment_order_status = 'EXECUTING' AND po.updated_at <= :updatedAt - INTERVAL 3 MINUTE))
                     AND po.failed_count < po.threshold
                 LIMIT 10 
             """.trimIndent()

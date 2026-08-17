@@ -1,65 +1,50 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-    kotlin("jvm") version "2.1.0"
-    kotlin("plugin.spring") version "2.1.0"
-    id("org.springframework.boot") version "3.5.16"
-    id("io.spring.dependency-management") version "1.1.7"
-}
-
-group = "com.example"
-version = "0.0.1-SNAPSHOT"
-description = "payment-service"
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
-}
-
-repositories {
-    mavenCentral()
+    kotlin("jvm") version "2.1.0" apply false
+    kotlin("plugin.spring") version "2.1.0" apply false
+    id("org.springframework.boot") version "3.5.16" apply false
+    id("io.spring.dependency-management") version "1.1.7" apply false
 }
 
 val springCloudVersion = "2024.0.0"
 
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
+allprojects {
+    group = "com.example"
+    version = "0.0.1-SNAPSHOT"
+
+    repositories {
+        mavenCentral()
     }
 }
 
-dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
-    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
+subprojects {
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.jetbrains.kotlin.plugin.spring")
+    apply(plugin = "io.spring.dependency-management")
 
-    implementation("org.springframework.cloud:spring-cloud-stream")
-    implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka-reactive")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-
-    implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
-
-    runtimeOnly("com.mysql:mysql-connector-j")
-    runtimeOnly("io.asyncer:r2dbc-mysql")
-    
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("io.projectreactor:reactor-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("io.mockk:mockk:1.13.2")
-}
-
-kotlin {
-    compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict")
+    configure<JavaPluginExtension> {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+        }
     }
-}
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+    configure<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension> {
+        imports {
+            mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
+            mavenBom("org.springframework.boot:spring-boot-dependencies:3.5.16")
+        }
+    }
+
+    dependencies {
+        "implementation"("com.fasterxml.jackson.module:jackson-module-kotlin")
+        "implementation"("org.jetbrains.kotlin:kotlin-reflect")
+        "implementation"("io.github.oshai:kotlin-logging-jvm:8.0.4")
+    }
+
+    tasks.withType<KotlinCompile> {
+        compilerOptions {
+            freeCompilerArgs.addAll("-Xjsr305=strict")
+        }
+    }
 }
