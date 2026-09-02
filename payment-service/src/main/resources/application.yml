@@ -5,25 +5,32 @@ spring:
 
   config:
     import: optional:file:.env[.properties]
-    activate:
-      on-profile: dev
 
   r2dbc:
     url: r2dbc:mysql://localhost:3306/test
     username: root
     password: 1234
 
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
   thymeleaf:
     cache: false
 
   cloud:
+    function:
+      definition: send
     stream:
+      bindings:
+        send-out-0:
+          destination: payment
+          producer:
+            partition-count: 6
       kafka:
         binder:
           brokers: localhost:9092
+          auto-create-topics: true
+        bindings:
+          send-out-0:
+            producer:
+              record-metadata-channel: payment-result
 
 PSP:
   toss:

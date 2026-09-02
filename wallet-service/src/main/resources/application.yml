@@ -1,0 +1,43 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: wallet-service
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/test
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  cloud:
+    function:
+      definition: consume
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:9092
+          auto-create-topics: true
+      bindings:
+        consume-in-0:
+          destination: payment
+          group: wallet-service
+
+logging:
+  level:
+    org:
+      springframework:
+        transaction: TRACE
+        orm:
+          jpa: DEBUG
+        kafka: TRACE
