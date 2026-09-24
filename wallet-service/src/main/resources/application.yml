@@ -24,14 +24,32 @@ spring:
     function:
       definition: consume
     stream:
-      kafka:
-        binder:
-          brokers: localhost:9092
-          auto-create-topics: true
       bindings:
         consume-in-0:
           destination: payment
           group: wallet-service
+        consume-out-0:
+          destination: wallet-event
+      kafka:
+        binder:
+          brokers: localhost:9092
+          auto-create-topics: true
+          transaction:
+            transaction-id-prefix: wallet-tx-
+            producer:
+              configuration:
+                acks: all
+                retries: 10
+          configuration:
+            isolation.level: read_committed
+        bindings:
+          consume-in-0:
+            consumer:
+              auto-commit-offset: false
+              configuration:
+                isolation.level: read_committed
+              enable-dlq: true
+              dlq-name: payment-dlq
 
 logging:
   level:
