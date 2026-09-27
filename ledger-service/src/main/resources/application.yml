@@ -1,0 +1,65 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: ledger-service
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  datasource:
+    hikari:
+      jdbc-url: jdbc:mysql://localhost:3306/test
+      username: root
+      password: 1234
+      driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/test
+
+  cloud:
+    function:
+      definition: consume
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:9092
+          configuration:
+            client:
+              dns:
+                lookup: use_all_dns_ips
+          required-acks: all
+          auto-create-topics: false
+          transaction:
+            transaction-id-prefix: ledger-
+            producer:
+              configuration:
+                transaction:
+                  timeout:
+                    ms: 30000
+
+
+        bindings:
+          consume-in-0:
+            consumer:
+              enable-dlq: true # DLQ ??
+              dlq-name: payment_ledger_dlq
+
+      bindings:
+        consume-in-0:
+          destination: payment
+          group: ledger-service
+          consumer:
+            max-attempts: 5 # ??? ??
+
+logging:
+  level:
+    org:
+      springframework:
+        transaction: TRACE
+        orm:
+          jpa: DEBUG
+        kafka: TRACE

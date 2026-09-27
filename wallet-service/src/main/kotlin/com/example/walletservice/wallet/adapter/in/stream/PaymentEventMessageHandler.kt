@@ -19,7 +19,7 @@ class PaymentEventMessageHandler(
     @Bean
     fun consume(): Consumer<Message<PaymentEventMessage>> {
         return Consumer { message ->
-            throw RuntimeException("")
+            //throw RuntimeException("")
             val walletEventMessage = settlementUseCase.processSettlement(message.payload)
             streamBridge.send("wallet", walletEventMessage)
         }
