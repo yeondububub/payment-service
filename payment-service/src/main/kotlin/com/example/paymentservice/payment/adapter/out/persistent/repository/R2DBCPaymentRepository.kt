@@ -95,7 +95,7 @@ class R2DBCPaymentRepository (
         return when {
             paymentEvent.isPaymentDone() -> handlePaymentCompletion(paymentEvent)
             paymentEvent.isLedgerUpdateDone() -> handleLedgerUpdate(paymentEvent)
-            paymentEvent.isWalletUpdated() -> handleWalletUpdate(paymentEvent)
+            paymentEvent.isWalletUpdateDone() -> handleWalletUpdate(paymentEvent)
             else -> error("Incorrect state for PaymentEvent id: \${paymentEvent.id}")
         }
     }

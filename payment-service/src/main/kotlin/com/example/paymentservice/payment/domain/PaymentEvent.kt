@@ -46,7 +46,7 @@ data class PaymentEvent (
         }
     }
 
-    fun isWalletUpdated(): Boolean {
+    fun isWalletUpdateDone(): Boolean {
         return paymentOrders.all { it.isWalletUpdated() }
     }
 

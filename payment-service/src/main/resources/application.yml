@@ -4,7 +4,9 @@ spring:
     name: payment-service
 
   config:
-    import: optional:file:.env[.properties]
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:../.env[.properties]
 
   r2dbc:
     url: r2dbc:mysql://localhost:3306/test
