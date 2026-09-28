@@ -31,4 +31,30 @@ data class PaymentEvent (
     fun isUnknown(): Boolean {
         return paymentOrders.all { it.paymentStatus == PaymentStatus.UNKNOWN }
     }
+
+    fun confirmWalletUpdate() {
+        paymentOrders.forEach { it.confirmWalletUpdate() }
+    }
+
+    fun confirmLedgerUpdate() {
+        paymentOrders.forEach { it.confirmLedgerUpdate() }
+    }
+
+    fun completeIfDone() {
+        if (allPaymentOrdersDone()) {
+            isPaymentDone = true
+        }
+    }
+
+    fun isWalletUpdated(): Boolean {
+        return paymentOrders.all { it.isWalletUpdated() }
+    }
+
+    fun isLedgerUpdateDone(): Boolean {
+        return paymentOrders.all { it.isLedgerUpdated() }
+    }
+
+    private fun allPaymentOrdersDone(): Boolean {
+        return paymentOrders.all { it.isWalletUpdated() && it.isLedgerUpdated() }
+    }
 }

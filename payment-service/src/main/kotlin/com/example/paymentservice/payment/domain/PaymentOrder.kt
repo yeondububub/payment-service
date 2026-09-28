@@ -14,4 +14,12 @@ data class PaymentOrder(
     fun isLedgerUpdated(): Boolean = isLedgerUpdated
 
     fun isWalletUpdated(): Boolean = isWalletUpdated
+
+    fun confirmWalletUpdate() {
+        isWalletUpdated = true
+    }
+
+    fun confirmLedgerUpdate() {
+        isLedgerUpdated = true
+    }
 }
