@@ -81,3 +81,34 @@ public DlqPartitionFunction partitionFunction() {
 }
 ```
 
+### Advanced Retry Option
+
+실패한 메시지들 재시도 관련 설정을 넣을 수 있다.
+
+- `maxAtttempts`: 재시도 하는 횟수.
+- `backOffInitialInterval`: 재시도 사이의 초기 대기 시간(밀리초 단위)을 지정.
+- `backOffMultipler`: 재시도 사이의 대기시간 배수를 지정
+- `backOffMaxInterval`: 재시도 간 최대 대기 시간을 밀리초 단위로 지정
+
+```properties
+spring.cloud.stream.bindings.[FUNCTION_NAME]-in-0.consumer.maxAtttempts
+spring.cloud.stream.bindings.[FUNCTION_NAME]-in-0.consumer.backOffInitialInterval
+spring.cloud.stream.bindings.[FUNCTION_NAME]-in-0.consumer.backOffMultipler
+spring.cloud.stream.bindings.[FUNCTION_NAME]-in-0.consumer.backOffMaxInterval
+```
+
+> [!NOTE]
+> 재시도를 모두 소진 했을 때 총 소요 시간은 Apache Kafka 의 max.poll.interval.ms 값을 넘기면 안된다. 만약 이 값을 넘기게 된다면 Kafka 는 Consumer 가 메시지를 가져가지 않으므로 죽었다고 판단해서 리밸런싱을 진행하기 때문. (max.poll.interval.ms 기본값은 5분이다.)
+
+다음 설정을 통해서 재시도 가능한 에러일 경우에만 재시도 하도록 설정할 수 있다.
+
+```properties
+spring.cloud.stream.bindings.processData-in-0.consumer.defaultRetryable=false
+```
+
+재시도 가능한 에러는 개발자가 지정해줘야한다. 
+
+```properties
+spring.cloud.stream.bindings.processData-in-0.consumer.retryableExceptions.java.lang.IllegalStateException=true
+spring.cloud.stream.bindings.processData-in-0.consumer.retryableExceptions.java.lang.IllegalArgumentException=false
+```
